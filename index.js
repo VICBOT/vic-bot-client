@@ -10,10 +10,6 @@ const board = new five.Board({
 });
 let motorLeft, motorRight
 board.on("ready", async() => {
-    console.log("YEah");
-
-    say.stop()
-    say.speak(`Board Ready Boy`)
     let rightPins = {
             pins: {
                 pwm: "GPIO12",
@@ -59,22 +55,22 @@ const moveMotor = (motor) => {
 
         console.log("BRAKED", speed)
     }
-    else if (direction.angle === "up") {
+    else if (direction === "up") {
         motorLeft.fwd(revSpeed)
         motorRight.fwd(revSpeed)
         console.log("Forward", revSpeed)
     }
-    else if (direction.angle === "down") {
+    else if (direction === "down") {
         motorLeft.rev(speed)
         motorRight.rev(speed)
         console.log("Reverse", speed)
     }
-    else if (direction.angle === "left") {
+    else if (direction === "left") {
         motorLeft.rev(speed)
         motorRight.fwd(revSpeed)
         console.log("Left", speed)
     }
-    else if (direction.angle === "right") {
+    else if (direction === "right") {
         motorLeft.fwd(revSpeed)
         motorRight.rev(speed)
         console.log("Right", speed)
