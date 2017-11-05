@@ -2,33 +2,33 @@ const Raspi = require("raspi-io");
 const five = require("johnny-five");
 const { HOST, PORT } = require("./config.json");
 const socket = require("socket.io-client")(`http://${HOST}:${PORT}`);
-//const say = require("say")
+const say = require("say")
 
 const board = new five.Board({
     io: new Raspi(),
     repl: false
 });
-let motors
+let motorLeft, motorRight
 board.on("ready", async() => {
     console.log("YEah");
-    //await say.speak(`Board Ready`)
-    motors = new five.Motors([{
-        pins: {
-            pwm: "GPIO12",
-            dir: "GPIO6"
-        },
-        pins: {
-            pwm: "GPIO13",
-            dir: "GPIO19"
-        }
-    }]);
-    motors.forEach(motor => {
-        motor.on("start", () => {
-            console.log("Started")
-        })
-    })
 
-    motors.forward(255)
+    say.stop()
+    say.speak(`Board Ready Boy`)
+    let rightPins = {
+            pins: {
+                pwm: "GPIO12",
+                dir: "GPIO6"
+            }
+        },
+        leftPins = {
+            pins: {
+                pwm: "GPIO13",
+                dir: "GPIO19"
+            }
+        }
+    motorLeft = new five.Motor(leftPins)
+    motorRight = new five.Motor(rightPins)
+
 });
 
 board.on("info", console.log)
@@ -42,14 +42,42 @@ socket.on("board", data => {});
 socket.on("ui", data => {
 
     socket.emit("board", data);
-    if (data.motor && typeof data.motor !== "string")
+
+    if (data.motor) {
         moveMotor(data.motor)
+    }
+
 });
 
-const moveMotor = ({ direction: { x, y, angle }, speed }) => {
-    console.log(x, y, angle, speed)
-    if (angle === "up")
-        motors.forward(speed)
-    else
-        motors.brake()
+const moveMotor = (motor) => {
+    let { speed, direction } = motor
+    let revSpeed = 255 - speed
+    if (!direction || speed == 0) {
+
+        motorLeft.stop()
+        motorRight.stop()
+
+        console.log("BRAKED", speed)
+    }
+    else if (direction.angle === "up") {
+        motorLeft.fwd(revSpeed)
+        motorRight.fwd(revSpeed)
+        console.log("Forward", revSpeed)
+    }
+    else if (direction.angle === "down") {
+        motorLeft.rev(speed)
+        motorRight.rev(speed)
+        console.log("Reverse", speed)
+    }
+    else if (direction.angle === "left") {
+        motorLeft.rev(speed)
+        motorRight.fwd(revSpeed)
+        console.log("Left", speed)
+    }
+    else if (direction.angle === "right") {
+        motorLeft.fwd(revSpeed)
+        motorRight.rev(speed)
+        console.log("Right", speed)
+    }
+
 }

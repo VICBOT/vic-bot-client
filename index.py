@@ -12,11 +12,15 @@ def init():
 def forward(tf):
     gpio.output(12, True)
     gpio.output(6, False)
+    gpio.output(13, True)
+    gpio.output(19, False)
     time.sleep(tf)
 
 def reverse(tf):
     gpio.output(12, False)
     gpio.output(6, True)
+    gpio.output(13, False)
+    gpio.output(19, True)
     time.sleep(tf)
 
 
